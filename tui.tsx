@@ -416,7 +416,7 @@ function DiffPanel(props) {
   }))
 
   return (
-    <box flexDirection="column" flexGrow={1} minHeight={0} gap={1}>
+    <box flexDirection="column" flexGrow={1} minHeight={0} gap={1} paddingLeft={1} paddingRight={1}>
       <box flexDirection="row" gap={1} flexShrink={0}>
         <text fg={theme.text.base}>Changes</text>
         <text fg={theme.text.muted}>{SOURCE_LABEL[props.source.mode] ?? props.source.mode}</text>

@@ -14,7 +14,8 @@
   "files": [
     "tui.tsx",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs"
   ],
   "keywords": [
     "opencode",
@@ -35,9 +36,17 @@
     "solid-js": ">=1.9.0"
   },
   "peerDependenciesMeta": {
-    "@opencode/plugin": { "optional": true },
-    "@opentui/core": { "optional": true },
-    "@opentui/solid": { "optional": true },
-    "solid-js": { "optional": true }
+    "@opencode/plugin": {
+      "optional": true
+    },
+    "@opentui/core": {
+      "optional": true
+    },
+    "@opentui/solid": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    }
   }
 }

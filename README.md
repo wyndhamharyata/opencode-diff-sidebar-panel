@@ -10,34 +10,17 @@ when you want it wider.
 
 ## What it looks like
 
-Sidebar (compact, always visible in a session):
+Sidebar, on a real session (a live change, showing the session's last turn):
 
-```
-Changes working tree +18 -9 ⤢
-▼ M src/panel.js +5 -4
-  @@ -561,7 +561,8 @@ function parseAutoEqIndex(text) {
-    const items = [];
-  - const match = line.match(/\.\/(.+?)\)/)
-  + // The path is everything after the last ") by ".
-  + const match = line.match(/\.\/(.+)\) by /)
-    if (match) ...
-▼ A tests/fixtures/autoeq-index.md +11 -0
-  @@ -0,0 +1,11 @@
-  + # AutoEQ index
-  + ...
-```
+![The diff in the sidebar](docs/sidebar.svg)
 
-Panel (click the header; drag the divider to widen, `f` for full screen):
+The panel, opened from the sidebar header (shown full screen with `f`):
 
-```
-Changes working tree +18 -9                        c collapse · f full · q close
-▼ M src/panel.js +5 -4
-  @@ -561,7 +561,8 @@ function parseAutoEqIndex(text) {
-    const items = [];
-  - const match = line.match(/\.\/(.+?)\)/)
-  + // The path is everything after the last ") by ".
-  + const match = line.match(/\.\/(.+)\) by /)
-```
+![The same diff in the panel](docs/panel.svg)
+
+Both are unedited captures of a real OpenCode window. To fit several files in
+one screen, the larger generated files in that session were collapsed — click a
+file header to do the same.
 
 ## Features
 
