@@ -1,7 +1,7 @@
 {
   "name": "opencode-diff-sidebar-panel",
   "version": "0.1.0",
-  "description": "OpenCode TUI plugin: a compact unified diff in the session sidebar, with a resizable diff panel.",
+  "description": "An OpenCode TUI plugin that shows a compact unified diff in the session sidebar and in a resizable panel.",
   "type": "module",
   "license": "MIT",
   "repository": {
