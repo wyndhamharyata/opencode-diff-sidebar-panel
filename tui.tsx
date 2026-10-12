@@ -28,8 +28,12 @@ import { For, Show, createMemo, createResource, createSignal, onCleanup } from "
 // Safety cap only; the pane's own width drives what is actually visible.
 // OpenTUI's `truncate` keeps both ends of an over-long line.
 const MAX_LINE_CHARS = 200
-const MAX_FILES = 16
-const MAX_LINES = 400
+// Every file header is listed; these budgets cap the diff lines rendered across
+// expanded files. The panel has room, and a scrollbox, for far more.
+const MAX_FILES = 200
+// The sidebar also caps each file, so one big file cannot crowd out the rest.
+const SIDEBAR = { total: 400, perFile: 80 }
+const PANEL = { total: 5000, perFile: Infinity }
 const REFRESH_MS = 5000
 
 const PANEL_NAME = "diff-sidebar.panel"
@@ -154,7 +158,7 @@ function clipChunks(chunks, max) {
 // Shared data: the file list for the selected source, refreshed when a turn
 // finishes and on a slow poll so manual edits show up. Call during component
 // setup so its subscriptions and timer are tied to the component's lifetime.
-function useChanges(context, getSessionID, source) {
+function useChanges(context, getSessionID, source, fold, budget) {
   const [tick, setTick] = createSignal(0)
 
   // Reuse the previous object for an unchanged file, so a refresh does not
@@ -221,17 +225,21 @@ function useChanges(context, getSessionID, source) {
     ),
   )
 
-  // Trim to what can render quickly, walking files top to bottom.
+  // Spend the line budget on expanded files top to bottom. Collapsed files cost
+  // nothing, and a file that runs past the budget is cut short, not hidden.
   const layout = createMemo(() => {
     const all = files() ?? []
-    const shown = []
-    let budget = MAX_LINES
-    for (const file of all.slice(0, MAX_FILES)) {
-      if (budget <= 0) break
-      shown.push(file)
-      budget -= parsePatch(file.patch).length
+    const shown = all.slice(0, MAX_FILES)
+    const limits = new Map()
+    let left = budget.total
+    for (const file of shown) {
+      if (fold.isCollapsed(file.file)) continue
+      const count = parsePatch(file.patch).length
+      const limit = Math.min(count, budget.perFile, Math.max(0, left))
+      limits.set(file.file, limit)
+      left -= limit
     }
-    return { shown, hiddenFiles: Math.max(0, all.length - shown.length), clipped: budget < 0 }
+    return { shown, limits, hiddenFiles: all.length - shown.length }
   })
 
   return { files, totals, layout }
@@ -296,6 +304,7 @@ function FileBlock(props) {
   const file = props.file
   const collapsed = () => props.fold.isCollapsed(file.file)
   const lines = createMemo(() => parsePatch(file.patch))
+  const limit = () => props.limit() ?? lines().length
   const path = () => splitPath(file.file)
   const filetype = pathToFiletype(file.file)
   const [highlighted] = createResource(
@@ -315,11 +324,16 @@ function FileBlock(props) {
         <text fg={theme.diff.text.removed}>{"-" + (file.deletions ?? 0)}</text>
       </box>
       <Show when={!collapsed()}>
-        <For each={lines()}>
+        <For each={lines().slice(0, limit())}>
           {(line, index) => (
             <DiffLine theme={theme} line={line} chunks={() => highlighted()?.[index()]} />
           )}
         </For>
+        <Show when={limit() < lines().length}>
+          <box flexShrink={0} onMouseUp={props.onMore}>
+            <text fg={theme.text.muted}>{`\u2026 ${lines().length - limit()} more lines`}</text>
+          </box>
+        </Show>
       </Show>
     </box>
   )
@@ -340,15 +354,13 @@ function DiffBody(props) {
             file={file}
             fold={props.fold}
             syntaxStyle={props.syntaxStyle}
+            limit={() => changes.layout().limits.get(file.file)}
+            onMore={props.onMore}
           />
         )}
       </For>
-      <Show when={changes.layout().hiddenFiles > 0 || changes.layout().clipped}>
-        <text fg={theme.text.muted}>
-          {changes.layout().hiddenFiles > 0
-            ? `\u2026 ${changes.layout().hiddenFiles} more file(s)`
-            : "\u2026 more lines"}
-        </text>
+      <Show when={changes.layout().hiddenFiles > 0}>
+        <text fg={theme.text.muted}>{`\u2026 ${changes.layout().hiddenFiles} more file(s)`}</text>
       </Show>
     </>
   )
@@ -357,7 +369,7 @@ function DiffBody(props) {
 function DiffSidebar(props) {
   const context = props.context
   const theme = context.theme
-  const changes = useChanges(context, props.sessionID, props.source)
+  const changes = useChanges(context, props.sessionID, props.source, props.fold, SIDEBAR)
   const openPanel = () => context.ui.panel.open(PANEL_NAME)
 
   return (
@@ -380,6 +392,7 @@ function DiffSidebar(props) {
         changes={changes}
         fold={props.fold}
         syntaxStyle={props.syntaxStyle}
+        onMore={openPanel}
       />
     </box>
   )
@@ -389,7 +402,7 @@ function DiffPanel(props) {
   const context = props.context
   const panel = props.panel
   const theme = context.theme
-  const changes = useChanges(context, () => panel.sessionID, props.source)
+  const changes = useChanges(context, () => panel.sessionID, props.source, props.fold, PANEL)
 
   // Active only while the panel owns input.
   context.keymap.layer(() => ({

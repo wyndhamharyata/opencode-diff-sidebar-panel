@@ -131,7 +131,9 @@ In both views, click a file header to collapse or expand that file.
 - Only recognised languages are highlighted; everything else shows uncoloured.
 - LSP is not used. It describes the current contents of a file, so it cannot
   colour removed lines or the context around a change.
-- Large diffs are capped at 16 files and 400 lines, then summarised.
+- Every changed file is listed. To stay fast, the sidebar shows at most 80 lines per file and
+  400 lines in total across expanded files; the rest is cut short with "… N more lines", which
+  opens the panel. The panel shows up to 5000 lines. Collapsed files don't count.
 
 ## License
 
