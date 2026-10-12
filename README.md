@@ -1,59 +1,60 @@
 # opencode-diff-sidebar-panel
 
-An [OpenCode](https://opencode.ai) TUI plugin. It shows your changes in the
-session sidebar. It also opens the same diff in a resizable panel.
+OpenCode opens `/diff` on a whole screen. That's right for a careful review, and
+too much for a quick check of what you just edited.
 
-The OpenCode sidebar is 42 columns wide. That width suits a file list and is
-tight for a diff. This plugin still fits a compact unified diff there. The
-result follows the diff view on OpenCode's own share page.
+This plugin puts a compact unified diff in the session sidebar instead, so it
+stays in view while you keep working. When 42 columns is not enough, click the
+header and the same diff opens in a side panel you can drag to any width.
 
 ## What it looks like
 
-Sidebar, on a real session:
+The sidebar, on a real session:
 
 ![The diff in the sidebar](docs/sidebar.svg)
 
-The same diff in the panel, opened from the sidebar header and shown full screen
-with `f`:
+The same diff in the panel, opened from the header and shown full screen with
+`f`:
 
 ![The same diff in the panel](docs/panel.svg)
 
-Both images are unedited captures of a real OpenCode window. The larger
-generated files in that session are collapsed to fit several files on one
-screen. A click on a file header does the same in any session.
+Both are straight captures from a real window. The larger generated files in
+that session are folded away so several of them fit on one screen, and clicking
+a file header does the same in yours.
 
 ## Features
 
-- A compact unified diff in the sidebar. One block per file. The directory is
-  dimmed and the filename is in full. Every file carries its `+N` and `-M`
-  counts.
-- A second home in the panel. The same diff opens in the right-hand pane. The
-  divider drags the panel wider. `f` fills the screen.
-- Syntax colours for every language OpenCode can highlight, taken from your
-  OpenCode theme. Nothing else to install.
-- Collapsible files. Click a file header, or press `c` in the panel to collapse
-  every file at once. A collapsed file stays collapsed through a refresh.
-- Two sources. The working tree is the default. The session's last turn is the
-  other.
-- Fresh data. The list refreshes when a turn ends. A slow poll picks up manual
-  edits.
+- A compact unified diff in the sidebar, with one block per file, the directory
+  dimmed, the filename in full, and `+N` and `-M` counts on the right.
+- A resizable side panel for when 42 columns is not enough. Same diff, more
+  room, and `f` takes over the window.
+- Syntax highlighting for every language OpenCode can highlight, using the
+  colours from your own theme, with nothing extra to install.
+- Files that fold. Click a header to fold one, or press `c` in the panel to fold
+  them all. A folded file stays folded through a refresh.
+- Two sources: the working tree by default, or what the session changed in its
+  last turn.
+- It keeps itself up to date. The list refreshes when a turn finishes, and a
+  slow poll picks up edits you make by hand.
 
 ## Requirements
 
-- OpenCode v2.0.0 or newer. The plugin uses the v2 TUI plugin API.
+- OpenCode v2.0.0 or newer. The plugin uses the v2 TUI plugin API and there is
+  no V1 build.
 - A project under git, or another version control system, for the working tree
   source.
 
 ## Install
 
-The plugin is one file. Clone the repo and point OpenCode's CLI config at it.
+It is one file and there is no build step. Clone it wherever you keep plugins
+and point your CLI config at it:
 
 ```sh
 git clone https://github.com/wyndhamharyata/opencode-diff-sidebar-panel.git \
   ~/.config/opencode/plugins/diff-sidebar
 ```
 
-Add it to `~/.config/opencode/cli.json`:
+Then add it to `~/.config/opencode/cli.json`:
 
 ```json
 {
@@ -61,14 +62,14 @@ Add it to `~/.config/opencode/cli.json`:
 }
 ```
 
-Restart OpenCode. The Changes section then appears in the sidebar of any session
-with changes.
+Restart OpenCode and open a session with changes. The Changes block appears in
+the sidebar.
 
 <details>
 <summary>Installing from somewhere else</summary>
 
-Any path in `cli.json` works. It can point at a folder next to the config file,
-at an absolute path, or at a `file://` URL. For example:
+Any path works in `cli.json`: a folder beside the config file, an absolute path,
+or a `file://` URL. For instance:
 
 ```json
 {
@@ -76,15 +77,15 @@ at an absolute path, or at a `file://` URL. For example:
 }
 ```
 
-The folder needs the `tui.tsx` entrypoint, which `package.json` names as the
-`./tui` export. No `npm install` step is needed. OpenCode hands `@opencode/plugin`,
-`@opentui/*` and `solid-js` to a plugin at load time.
+The folder needs its `tui.tsx` entrypoint, which `package.json` lists as the
+`./tui` export. There is no `npm install` step. OpenCode hands `@opencode/plugin`,
+`@opentui/*` and `solid-js` to a plugin when it loads.
 
 </details>
 
 ## Use it
 
-The sidebar section is always on. For the wider view, click **Changes**, click
+The sidebar block is always there. For the wider view, click **Changes**, click
 the `⤢` glyph, or run `/diff-panel`.
 
 | Command | Slash | What it does |
@@ -92,8 +93,8 @@ the `⤢` glyph, or run `/diff-panel`.
 | Switch the diff source | `/sidebar-diff` (`/sdiff`) | Show the working tree or the session's last turn |
 | Open the diff panel | `/diff-panel` (`/sdp`) | Open the diff in the resizable panel |
 
-Both sit in the command palette (`ctrl+p`). A key can run either one, by command
-id, in `cli.json`. For example
+Both are in the command palette (`ctrl+p`). You can bind either one to a key by
+its command id in `cli.json`, for example
 `"keybinds": { "diff-sidebar.panel": "ctrl+shift+d" }`.
 
 Inside the panel:
@@ -101,25 +102,26 @@ Inside the panel:
 | Key | What it does |
 | --- | --- |
 | `f` | Fill the screen with the diff |
-| `c` | Collapse or expand every file |
+| `c` | Fold or unfold every file |
 | `s` | Switch the source |
 | `q` | Close the panel |
 
-In both views, a click on a file header collapses or expands that file.
+Clicking a file header folds or unfolds it in both views.
 
 ## Notes and limits
 
-- The OpenCode v2 sidebar is a fixed 42 columns wide. The panel removes that
-  limit. It uses the same pane. It starts at half the window. The divider drags
-  it wider.
-- A line that does not fit is shortened, with both ends kept.
-- Only recognised languages get colours. Everything else stays plain.
-- LSP is not involved. LSP describes the current contents of a file. It says
-  nothing about removed lines, or about the code around a change.
-- Every changed file is listed. The sidebar shows at most 80 lines of a file and
-  400 lines across the expanded files. The rest shortens to "… N more lines". A
-  click on that line opens the panel. The panel shows up to 5000 lines. A
-  collapsed file uses none of the allowance.
+- The OpenCode v2 sidebar is stuck at 42 columns, and no setting moves it. The
+  panel gets around that by using the same pane with a draggable divider, and it
+  starts at half the window.
+- A long line is shortened, with both ends kept so you can still see where it
+  goes.
+- Only languages OpenCode recognises get colours. Anything else stays plain.
+- No LSP goes into this. LSP describes the current contents of a file, so it has
+  nothing to say about deleted lines or about the code around a change.
+- Every changed file is listed. The sidebar shows at most 80 lines from one file
+  and 400 across the files you have expanded, and the rest becomes a
+  "… N more lines" link that opens the panel. The panel shows up to 5000. A
+  folded file costs nothing.
 
 ## License
 
