@@ -1,0 +1,43 @@
+{
+  "name": "opencode-diff-sidebar-panel",
+  "version": "0.1.0",
+  "description": "OpenCode TUI plugin: a compact unified diff in the session sidebar, with a resizable diff panel.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wyndhamharyata/opencode-diff-sidebar-panel.git"
+  },
+  "exports": {
+    "./tui": "./tui.tsx"
+  },
+  "files": [
+    "tui.tsx",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "opencode-tui-plugin",
+    "tui",
+    "diff",
+    "sidebar",
+    "code-review"
+  ],
+  "engines": {
+    "opencode": ">=2.0.0"
+  },
+  "peerDependencies": {
+    "@opencode/plugin": ">=2.0.0",
+    "@opentui/core": ">=0.5.17",
+    "@opentui/solid": ">=0.5.17",
+    "solid-js": ">=1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@opencode/plugin": { "optional": true },
+    "@opentui/core": { "optional": true },
+    "@opentui/solid": { "optional": true },
+    "solid-js": { "optional": true }
+  }
+}
